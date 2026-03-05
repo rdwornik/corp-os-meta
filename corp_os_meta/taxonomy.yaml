@@ -14,7 +14,7 @@ topics:
     aliases: ["Service Level Agreement", "Service Level Agreements", "SLAs", "service levels"]
 
   - name: "SaaS Architecture"
-    aliases: ["SaaS platform", "SaaS Platform", "cloud architecture", "platform architecture"]
+    aliases: ["SaaS", "SaaS platform", "SaaS Platform", "cloud architecture", "platform architecture"]
 
   - name: "Technical Account Manager"
     aliases: ["TAM", "account manager", "technical account management"]

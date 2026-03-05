@@ -3,6 +3,7 @@ Taxonomy loading and term normalization.
 Reads taxonomy.yaml, builds alias lookup, normalizes extracted terms.
 """
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -41,20 +42,41 @@ def load_taxonomy(path: Path | None = None) -> dict:
     return _TAXONOMY_CACHE
 
 
-def build_alias_map(taxonomy: dict, section: str) -> dict[str, str]:
-    """Build lowercase alias → canonical name lookup."""
-    alias_map = {}
+def preprocess(term: str) -> str:
+    """Normalize term for fuzzy-tolerant matching.
+
+    Strip/casefold, remove parentheticals, normalize &→and,
+    collapse whitespace, strip trailing 's' (for terms >3 chars, not 'ss').
+    """
+    result = term.strip().casefold()
+    result = re.sub(r"\s*\([^)]*\)", "", result)  # remove parenthetical
+    result = result.replace(" & ", " and ")
+    result = re.sub(r"\s+", " ", result).strip()  # collapse whitespace
+    if len(result) > 3 and result.endswith("s") and not result.endswith("ss"):
+        result = result[:-1]
+    return result
+
+
+def build_alias_map(taxonomy: dict, section: str) -> tuple[dict[str, str], dict[str, str]]:
+    """Build lookup maps: exact (lowered) and preprocessed."""
+    exact_map = {}
+    preprocessed_map = {}
+
     for entry in taxonomy.get(section, []):
         canonical = entry["name"]
-        alias_map[canonical.lower()] = canonical
+        exact_map[canonical.lower()] = canonical
+        preprocessed_map[preprocess(canonical)] = canonical
+
         for alias in entry.get("aliases", []):
-            alias_map[alias.lower()] = canonical
-    return alias_map
+            exact_map[alias.lower()] = canonical
+            preprocessed_map[preprocess(alias)] = canonical
+
+    return exact_map, preprocessed_map
 
 
 def normalize_terms(values: list[str], taxonomy: dict, section: str) -> NormalizationResult:
-    """Normalize a list of terms against taxonomy section."""
-    alias_map = build_alias_map(taxonomy, section)
+    """Normalize terms: exact match first, then preprocessed fallback."""
+    exact_map, preprocessed_map = build_alias_map(taxonomy, section)
 
     normalized = []
     changes = []
@@ -63,7 +85,10 @@ def normalize_terms(values: list[str], taxonomy: dict, section: str) -> Normaliz
     dupes = 0
 
     for val in values:
-        canonical = alias_map.get(val.lower())
+        canonical = exact_map.get(val.lower())  # exact match
+        if not canonical:
+            canonical = preprocessed_map.get(preprocess(val))  # preprocessed
+
         if canonical:
             if canonical in seen:
                 dupes += 1
