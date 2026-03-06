@@ -16,7 +16,7 @@ def test_valid_note():
         source_file="test.mkv",
     )
     assert note.title == "Test Note"
-    assert note.schema_version == 1
+    assert note.schema_version == 2
 
 
 def test_missing_required_field():

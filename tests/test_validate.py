@@ -24,6 +24,7 @@ def test_fully_valid_note():
         "date": date(2026, 1, 1),
         "type": "presentation",
         "topics": ["SLA"],
+        "domains": ["Product"],
         "summary": "A test note about SLAs.",
         "source_tool": "test",
         "source_file": "test.md",

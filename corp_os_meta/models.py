@@ -1,6 +1,6 @@
 """
-Pydantic models defining the frontmatter contract for all corp-by-os notes.
-Every tool imports NoteFrontmatter to validate output before writing.
+Pydantic models defining the frontmatter contract for all corporate-os notes.
+Schema version 2: adds knowledge dimensions (domains, layers, confidentiality, authority, temporal validity).
 """
 from datetime import date
 from enum import Enum
@@ -8,7 +8,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 class DocumentType(str, Enum):
@@ -27,17 +27,59 @@ class DocumentType(str, Enum):
     SECURITY_QUESTIONNAIRE = "security_questionnaire"
 
 
+class SourceType(str, Enum):
+    OPPORTUNITY = "opportunity"
+    RFP = "rfp"
+    MEETING = "meeting"
+    TRAINING = "training"
+    DOCUMENTATION = "documentation"
+    RELEASE_NOTE = "release_note"
+    RESEARCH = "research"
+    INTERNAL_UPDATE = "internal_update"
+
+
+class Layer(str, Enum):
+    OPERATIONAL = "operational"
+    LEARNING = "learning"
+    REFERENCE = "reference"
+
+
+class Confidentiality(str, Enum):
+    PUBLIC = "public"
+    INTERNAL = "internal"
+    CONFIDENTIAL = "confidential"
+    RESTRICTED = "restricted"
+
+
+class Authority(str, Enum):
+    AUTHORITATIVE = "authoritative"
+    APPROVED = "approved"
+    TRIBAL = "tribal"
+
+
 class QualityLevel(str, Enum):
     FULL = "full"
     PARTIAL = "partial"
     FRAGMENT = "fragment"
 
 
-class NoteFrontmatter(BaseModel):
-    """Required and optional frontmatter fields for all corp-by-os notes.
+class DomainEnum(str, Enum):
+    PRODUCT = "Product"
+    PLATFORM_ARCHITECTURE = "Platform & Architecture"
+    DELIVERY_IMPLEMENTATION = "Delivery & Implementation"
+    CUSTOMER_SUCCESS = "Customer Success"
+    GO_TO_MARKET = "Go-to-Market"
+    COMMERCIALS = "Commercials"
+    COMPETITIVE = "Competitive"
+    INDUSTRY_SUPPLY_CHAIN = "Industry & Supply Chain"
 
-    This is the CONTRACT. Every tool must produce frontmatter that validates
-    against this model. Tool-specific fields go in tool_meta.
+
+class NoteFrontmatter(BaseModel):
+    """Required and optional frontmatter fields for all corporate-os notes.
+
+    Schema v2: Knowledge dimensions for personal business mastery.
+    Every tool must produce frontmatter that validates against this model.
+    Tool-specific fields go in tool_meta.
     """
 
     # ── Required ──────────────────────────────────────────────────
@@ -46,24 +88,38 @@ class NoteFrontmatter(BaseModel):
     type: DocumentType
     topics: list[str] = Field(default_factory=list, max_length=8)
     schema_version: int = SCHEMA_VERSION
-    source_tool: str  # "knowledge-extractor", "project-extractor", etc.
-    source_file: str  # original file path or identifier
+    source_tool: str
+    source_file: str
 
-    # ── Optional but standardized ─────────────────────────────────
+    # ── Knowledge Dimensions (v2) ─────────────────────────────────
+    source_type: SourceType = SourceType.DOCUMENTATION
+    layer: Layer = Layer.LEARNING
+    domains: list[str] = Field(default_factory=list, max_length=3)
+    confidentiality: Confidentiality = Confidentiality.INTERNAL
+    authority: Authority = Authority.TRIBAL
+
+    # ── Temporal Validity (v2) ────────────────────────────────────
+    valid_to: date | None = None
+    last_verified: date | None = None
+
+    # ── Context ───────────────────────────────────────────────────
     products: list[str] = Field(default_factory=list, max_length=4)
     people: list[str] = Field(default_factory=list, max_length=3)
+    client: str | None = None
+    project: str | None = None
+
+    # ── Standard Optional ─────────────────────────────────────────
     language: str = "en"
     quality: QualityLevel = QualityLevel.FULL
     summary: str | None = None
-    duration_min: int | None = None  # for video/meeting content
-    model: str | None = None  # AI model used for extraction
+    duration_min: int | None = None
+    model: str | None = None
     tokens_used: int | None = None
-    confidence: float | None = None  # 0.0-1.0, for AI-extracted content
-    project: str | None = None  # project ID for corp-project-extractor
-    tags: list[str] = Field(default_factory=list)  # Obsidian convenience, non-authoritative
+    confidence: float | None = None
+    tags: list[str] = Field(default_factory=list)
 
     # ── Tool-specific namespace ───────────────────────────────────
     tool_meta: dict[str, Any] = Field(default_factory=dict)
 
-    # ── Validation metadata (set by validate, not by tool) ────────
+    # ── Validation metadata ───────────────────────────────────────
     validation_warnings: list[str] = Field(default_factory=list, exclude=True)

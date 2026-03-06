@@ -155,6 +155,97 @@ term_normalization:
   "BY ": "Blue Yonder "
   "JDA": "Blue Yonder (formerly JDA)"
 
+# ─── Knowledge Domains ───────────────────────────────────────────────
+# 8 domains covering the full business value chain.
+# Every note gets 1-3 domains. Domains are broad; topics provide granularity.
+# "Strategy" is a TOPIC, not a domain — earns domain status at 30+ notes.
+
+domains:
+  - name: "Product"
+    aliases: ["product management", "roadmap", "capabilities", "releases", "packaging", "product strategy"]
+    description: "What we build — roadmap, capabilities, packaging, releases"
+
+  - name: "Platform & Architecture"
+    aliases: ["platform", "architecture", "cloud", "security", "integration", "data", "infrastructure", "observability", "technical architecture"]
+    description: "Cloud, security, integration, data, observability"
+
+  - name: "Delivery & Implementation"
+    aliases: ["delivery", "implementation", "go-live", "methodology", "project management", "deployment", "cutover", "estimation"]
+    description: "How we deliver — methodology, estimations, risks, go-live"
+
+  - name: "Customer Success"
+    aliases: ["customer success", "CS", "adoption", "renewals", "support", "escalation", "value realization", "retention"]
+    description: "Adoption, renewals, support, escalation, value realization"
+
+  - name: "Go-to-Market"
+    aliases: ["GTM", "go to market", "sales", "marketing", "pre-sales", "presales", "partner ecosystem", "analyst relations", "positioning"]
+    description: "Sales motions, marketing, pre-sales, partner ecosystem"
+
+  - name: "Commercials"
+    aliases: ["commercial", "pricing", "licensing", "SKU", "SKUs", "contracts", "deal mechanics", "TCO", "subscription model", "discounting"]
+    description: "Pricing, licensing, SKUs, contracts, deal mechanics"
+
+  - name: "Competitive"
+    aliases: ["competitive", "competitor", "win/loss", "differentiators", "competitive positioning", "landmines", "battle cards"]
+    description: "Positioning, win/loss, differentiators, landmines"
+
+  - name: "Industry & Supply Chain"
+    aliases: ["industry", "vertical", "supply chain", "logistics", "planning", "execution", "optimization", "retail", "manufacturing", "CPG", "pharma", "FMCG", "S&OP", "SIOP"]
+    description: "Verticals + domain concepts — planning, execution, optimization"
+
+# ─── Source Types ─────────────────────────────────────────────────────
+# Where the knowledge came from. Replaces overlap between old 'type' field
+# and proposed 'source_type'. Tools set this based on input context.
+
+source_types:
+  - "opportunity"
+  - "rfp"
+  - "meeting"
+  - "training"
+  - "documentation"
+  - "release_note"
+  - "research"
+  - "internal_update"
+
+# ─── Layers ───────────────────────────────────────────────────────────
+# Operational = doing my job. Learning = understanding the business. Reference = reusable assets.
+
+layers:
+  - "operational"
+  - "learning"
+  - "reference"
+
+# ─── Confidentiality ─────────────────────────────────────────────────
+# MANDATORY on every note. Defaults to "internal" if not specified.
+
+confidentiality_levels:
+  - "public"           # Can share externally
+  - "internal"         # Blue Yonder internal only (DEFAULT)
+  - "confidential"     # Client-specific, NDA-protected
+  - "restricted"       # M&A, non-public pricing, security artifacts
+
+# ─── Authority ────────────────────────────────────────────────────────
+# How trustworthy is this information?
+
+authority_levels:
+  - "authoritative"    # Official docs, signed RFPs, product specs
+  - "approved"         # Reviewed presentations, validated answers
+  - "tribal"           # Meeting notes, hallway conversations, inferences (DEFAULT)
+
+# ─── Temporal Validity Rules ──────────────────────────────────────────
+# Auto-calculated valid_to based on domain. Tools use this matrix.
+# Notes in 02_sources/ are immutable — validity applies to 03_playbooks/ and 04_evergreen/.
+
+validity_matrix:
+  "Commercials": 90          # days — pricing changes fast
+  "Competitive": 90          # competitor landscape shifts
+  "Platform & Architecture": 180
+  "Product": 180
+  "Go-to-Market": 180
+  "Delivery & Implementation": 365
+  "Customer Success": 365
+  "Industry & Supply Chain": null   # no expiry — domain concepts are stable
+
 # ─── Cardinality Caps ────────────────────────────────────────────────
 # Enforced during validation. Truncate to max, warn.
 
@@ -162,3 +253,4 @@ caps:
   topics: 8
   products: 4
   people: 3
+  domains: 3

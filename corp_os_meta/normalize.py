@@ -5,6 +5,7 @@ Reads taxonomy.yaml, builds alias lookup, normalizes extracted terms.
 import logging
 import re
 from dataclasses import dataclass
+from datetime import date, timedelta
 from pathlib import Path
 
 import yaml
@@ -120,6 +121,19 @@ def apply_term_normalization(text: str, taxonomy: dict) -> str:
     return text
 
 
+def calculate_valid_to(domains: list[str], base_date: date, taxonomy: dict) -> date | None:
+    """Auto-calculate valid_to from domain + validity matrix.
+
+    Uses the SHORTEST validity period among all domains.
+    Returns None if all domains have null validity (no expiry).
+    """
+    matrix = taxonomy.get("validity_matrix", {})
+    periods = [matrix[d] for d in domains if matrix.get(d) is not None]
+    if not periods:
+        return None
+    return base_date + timedelta(days=min(periods))
+
+
 def normalize_frontmatter(
     data: dict, taxonomy: dict | None = None
 ) -> tuple[dict, list[str], list[str]]:
@@ -144,6 +158,21 @@ def normalize_frontmatter(
         data["products"] = result.normalized
         all_changes.extend(result.changes)
         all_unknown.extend(result.unknown)
+
+    # Normalize domains
+    if "domains" in data and data["domains"]:
+        result = normalize_terms(data["domains"], taxonomy, "domains")
+        data["domains"] = result.normalized
+        all_changes.extend(result.changes)
+        all_unknown.extend(result.unknown)
+
+    # Auto-calculate valid_to if not manually set
+    if "valid_to" not in data or data.get("valid_to") is None:
+        if data.get("domains"):
+            note_date = data.get("date", date.today())
+            if isinstance(note_date, str):
+                note_date = date.fromisoformat(note_date)
+            data["valid_to"] = calculate_valid_to(data["domains"], note_date, taxonomy)
 
     # Apply term normalization to text fields
     for field in ["title", "summary"]:

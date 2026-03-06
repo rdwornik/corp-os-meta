@@ -7,7 +7,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from .models import NoteFrontmatter
+from .models import Confidentiality, NoteFrontmatter
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +39,10 @@ def validate_frontmatter(
         issues.append("No topics extracted — note may be hard to find in graph")
     if not note.summary:
         issues.append("No summary — note may lack context")
+    if not note.domains:
+        issues.append("No domains — note won't appear in domain queries")
+    if note.confidentiality == Confidentiality.CONFIDENTIAL and not note.client:
+        issues.append("Confidential note without client name")
 
     if issues:
         note.validation_warnings = issues

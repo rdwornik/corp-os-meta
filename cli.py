@@ -140,10 +140,41 @@ def report(vault_path: str):
         table.add_row(topic, str(count))
     console.print(table)
 
+    # Domain frequency
+    all_domains: dict[str, int] = {}
+    stale_count = 0
+    from datetime import date as date_type
+
+    for f in note_files:
+        text = f.read_text(encoding="utf-8")
+        data, _ = extract_yaml_frontmatter(text)
+        if not data:
+            continue
+        for domain in data.get("domains", []):
+            all_domains[domain] = all_domains.get(domain, 0) + 1
+        valid_to = data.get("valid_to")
+        if valid_to:
+            if isinstance(valid_to, str):
+                valid_to = date_type.fromisoformat(valid_to)
+            if isinstance(valid_to, date_type) and valid_to < date_type.today():
+                stale_count += 1
+
+    if all_domains:
+        domain_table = Table(title="Domain Distribution")
+        domain_table.add_column("Domain", style="cyan")
+        domain_table.add_column("Count", justify="right")
+        for domain, count in sorted(all_domains.items(), key=lambda x: -x[1]):
+            domain_table.add_row(domain, str(count))
+        console.print(domain_table)
+
     console.print(f"\n[bold]Vault stats:[/]")
     console.print(f"  Notes: {len(note_files)}")
     console.print(f"  Quarantined: {quarantine_count}")
     console.print(f"  Unique topics: {len(all_topics)}")
+    if all_domains:
+        console.print(f"  Unique domains: {len(all_domains)}")
+    if stale_count:
+        console.print(f"  [yellow]Stale notes (past valid_to): {stale_count}[/]")
     if all_unknown:
         console.print(f"  [yellow]Unknown terms: {', '.join(set(all_unknown))}[/]")
 

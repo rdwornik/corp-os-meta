@@ -9,6 +9,11 @@
 - [x] CLI (validate, normalize, report)
 - [x] Tests for all modules
 
+## Done (v1.1)
+- [x] Smart preprocessing layer (parentheticals, plurals, ampersands, whitespace)
+- [x] Two-pass matching: exact first, preprocessed fallback
+- [x] Added "SaaS" alias to SaaS Architecture
+
 ## Backlog
 - [ ] Integrate into corp-knowledge-extractor (replace local taxonomy)
 - [ ] Integrate into corp-project-extractor
