@@ -1,41 +1,86 @@
 # CLAUDE.md — corp_os_meta
 
-## Workflow
+## What this repo does
 
-- Read `tasks/todo.md` at session start for current priorities
-- Log discoveries in `tasks/lessons.md`
-- Run `pytest tests/ -v` after every change
-- Keep code under 300 lines total (excluding tests and taxonomy)
+Shared metadata schema and taxonomy for the corp-by-os agent ecosystem. Defines the frontmatter CONTRACT (Pydantic models) that all extraction tools must follow when producing Obsidian vault notes. Provides taxonomy normalization, validation with quarantine routing, product resolution, and a CLI for vault health management.
 
-## Engineering Principles
+## Quick start
 
-- Simple > clever. Minimal abstractions.
-- Every function must have tests.
-- No silent failures — log warnings, raise on errors.
-- Taxonomy changes must be backward-compatible.
-
-## Project-Specific: corp_os_meta
-
-This package defines the metadata CONTRACT for all corp-by-os tools.
-Changes here affect EVERY tool in the ecosystem.
-
-### Rules
-- taxonomy.yaml changes must be backward-compatible (add, never rename without alias)
-- New required fields in NoteFrontmatter = schema_version bump
-- New optional fields = no version bump needed
-- <300 lines of code total (excluding tests and taxonomy)
-- Every function must have tests
-- This package has ZERO external dependencies beyond pydantic, pyyaml, click, rich
-
-### Key Files
-- `corp_os_meta/models.py` — Pydantic models (the contract)
-- `corp_os_meta/normalize.py` — taxonomy loading + term normalization
-- `corp_os_meta/validate.py` — validation + quarantine routing
-- `corp_os_meta/taxonomy.yaml` — canonical terms + aliases
-- `cli.py` — Click CLI for vault management
-
-### Testing
 ```bash
+pip install -e C:\Users\1028120\Documents\Scripts\corp-os-meta
 pytest tests/ -v
 python -c "from corp_os_meta import NoteFrontmatter; print('OK')"
 ```
+
+## Architecture
+
+```
+corp_os_meta/
+├── models.py       — Pydantic models: NoteFrontmatter, enums (the contract)
+├── normalize.py    — taxonomy loading, alias resolution, term normalization
+├── validate.py     — schema validation + quarantine routing
+├── products.py     — product key resolution, source tier classification
+├── overlays.py     — structured extraction overlay schemas (architecture, security, etc.)
+├── utils.py        — parse_llm_json (robust LLM JSON parsing)
+├── cli.py          — Click CLI: validate, normalize, report commands
+├── taxonomy.yaml   — canonical terms + aliases (topics, products, domains)
+└── data/
+    ├── products.yaml     — product catalog with display names + variants
+    └── source_tiers.yaml — source reliability scoring
+```
+
+Entry point: `corp-meta` CLI (defined in pyproject.toml as `corp_os_meta.cli:main`)
+
+Data flow: Extraction tools → normalize_frontmatter() → validate_frontmatter() → vault or _quarantine/
+
+## Dev standards
+
+- Python 3.12+, Windows-first (`py -m`, pathlib)
+- `pyproject.toml` as single source of truth (no requirements.txt)
+- `ruff` + `pytest` quality gate
+- ZERO external dependencies beyond pydantic, pyyaml, click, rich, json-repair
+- taxonomy.yaml changes must be backward-compatible (add, never rename without alias)
+- New required fields in NoteFrontmatter = schema_version bump
+- New optional fields = no version bump needed
+- Every function must have tests
+- No silent failures — log warnings, raise on errors
+- Feature branches, no deletions without asking
+
+## Key commands
+
+```bash
+# Validate a single note or entire vault
+corp-meta validate path/to/note.md
+corp-meta validate path/to/vault/ --recursive --strict
+
+# Normalize taxonomy terms in-place
+corp-meta normalize path/to/note.md --in-place
+
+# Report on vault health
+corp-meta report path/to/vault/
+
+# Run tests
+pytest tests/ -v
+```
+
+## Test suite
+
+```bash
+pytest tests/ -v    # 87 tests, all passing
+```
+
+Coverage: models, normalize, validate, preprocess, products, utils, deep extraction fields, dimension fields.
+
+## Dependencies
+
+- **pydantic** (>=2.0) — schema validation
+- **pyyaml** (>=6.0) — taxonomy + config loading
+- **click** (>=8.0) — CLI framework
+- **rich** (>=13.0) — terminal output formatting
+- **json-repair** (>=0.30) — fallback for malformed LLM JSON
+
+## Known issues
+
+- Code exceeds the <300 line target (999 lines across 8 modules)
+- No test coverage for `cli.py` (CLI commands) or `overlays.py` (overlay schemas)
+- `.claude/` directory is in `.gitignore` — local settings only
