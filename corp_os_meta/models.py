@@ -2,6 +2,7 @@
 Pydantic models defining the frontmatter contract for all corporate-os notes.
 Schema version 2: adds knowledge dimensions (domains, layers, confidentiality, authority, temporal validity).
 """
+
 import datetime
 from enum import Enum
 from typing import Any, Optional

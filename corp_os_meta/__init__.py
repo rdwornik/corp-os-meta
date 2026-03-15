@@ -1,4 +1,5 @@
 """corp_os_meta — Shared metadata schema for corp-by-os agent ecosystem."""
+
 from .models import (
     SCHEMA_VERSION,
     Authority,
@@ -11,7 +12,28 @@ from .models import (
     SourceType,
 )
 from .normalize import load_taxonomy, normalize_frontmatter, normalize_terms
-from .validate import ValidationResult, generate_links_line, get_output_path, validate_frontmatter
+from .products import (
+    classify_source_tier,
+    get_product_display_name,
+    get_source_reliability,
+    is_platform_service,
+    resolve_product_key,
+)
+from .utils import parse_llm_json
+from .overlays import (
+    ArchitectureOverlay,
+    CommercialOverlay,
+    MeetingOverlay,
+    OVERLAY_MAP,
+    RFPOverlay,
+    SecurityOverlay,
+)
+from .validate import (
+    ValidationResult,
+    generate_links_line,
+    get_output_path,
+    validate_frontmatter,
+)
 
 __all__ = [
     "NoteFrontmatter",
@@ -30,4 +52,16 @@ __all__ = [
     "ValidationResult",
     "get_output_path",
     "generate_links_line",
+    "parse_llm_json",
+    "resolve_product_key",
+    "get_product_display_name",
+    "is_platform_service",
+    "get_source_reliability",
+    "classify_source_tier",
+    "ArchitectureOverlay",
+    "SecurityOverlay",
+    "CommercialOverlay",
+    "RFPOverlay",
+    "MeetingOverlay",
+    "OVERLAY_MAP",
 ]

@@ -1,4 +1,5 @@
 """Tests for Pydantic frontmatter models."""
+
 from datetime import date
 
 import pytest
@@ -66,7 +67,9 @@ def test_frontmatter_with_v21_fields():
     )
     assert fm.content_origin == "mywork"
     assert fm.source_category == "template"
-    assert fm.source_locator == "30_Templates/01_Presentation_Decks/Platform_Overview.pptx"
+    assert (
+        fm.source_locator == "30_Templates/01_Presentation_Decks/Platform_Overview.pptx"
+    )
     assert fm.routing_confidence == 1.0
 
 
