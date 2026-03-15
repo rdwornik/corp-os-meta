@@ -1,6 +1,7 @@
 """
 Validation and quarantine routing for note frontmatter.
 """
+
 import logging
 from enum import Enum
 from pathlib import Path

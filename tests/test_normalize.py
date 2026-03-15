@@ -1,4 +1,5 @@
 """Tests for taxonomy normalization."""
+
 from corp_os_meta.normalize import load_taxonomy, normalize_frontmatter, normalize_terms
 
 

@@ -1,4 +1,5 @@
 """Tests for validation and quarantine routing."""
+
 from datetime import date
 
 from corp_os_meta import ValidationResult, validate_frontmatter

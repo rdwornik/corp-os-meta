@@ -1,4 +1,5 @@
 """Tests for knowledge dimension schema and normalization."""
+
 from datetime import date, timedelta
 
 from corp_os_meta import NoteFrontmatter, ValidationResult, validate_frontmatter
@@ -6,7 +7,6 @@ from corp_os_meta.models import (
     SCHEMA_VERSION,
     Authority,
     Confidentiality,
-    DomainEnum,
     Layer,
     SourceType,
 )
@@ -117,7 +117,9 @@ class TestTemporalValidity:
         """If one domain has expiry and another doesn't, use the expiry."""
         taxonomy = load_taxonomy()
         base = date(2026, 3, 1)
-        valid_to = calculate_valid_to(["Industry & Supply Chain", "Competitive"], base, taxonomy)
+        valid_to = calculate_valid_to(
+            ["Industry & Supply Chain", "Competitive"], base, taxonomy
+        )
         assert valid_to == base + timedelta(days=90)
 
     def test_auto_calculation_in_normalize(self):

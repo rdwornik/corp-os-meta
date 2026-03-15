@@ -1,10 +1,13 @@
 """Tests for preprocessing layer."""
+
 from corp_os_meta.normalize import preprocess, normalize_terms, load_taxonomy
 
 
 class TestPreprocess:
     def test_parenthetical_removal(self):
-        assert preprocess("Service Level Agreements (SLAs)") == "service level agreement"
+        assert (
+            preprocess("Service Level Agreements (SLAs)") == "service level agreement"
+        )
 
     def test_casefold(self):
         assert preprocess("Disaster Recovery") == "disaster recovery"
@@ -29,14 +32,19 @@ class TestPreprocess:
 
     def test_combined(self):
         """All transformations together."""
-        assert preprocess("  Service Level Agreements (SLAs)  ") == "service level agreement"
+        assert (
+            preprocess("  Service Level Agreements (SLAs)  ")
+            == "service level agreement"
+        )
 
 
 class TestPreprocessedMatching:
     def test_sla_with_parenthetical(self):
         """The original failure case: 'Service Level Agreements (SLAs)' should match SLA."""
         taxonomy = load_taxonomy()
-        result = normalize_terms(["Service Level Agreements (SLAs)"], taxonomy, "topics")
+        result = normalize_terms(
+            ["Service Level Agreements (SLAs)"], taxonomy, "topics"
+        )
         assert "SLA" in result.normalized
         assert len(result.unknown) == 0
 

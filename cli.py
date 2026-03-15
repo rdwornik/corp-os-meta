@@ -7,6 +7,7 @@ Usage:
   corp-meta normalize path/to/note.md --in-place
   corp-meta report path/to/vault/
 """
+
 import re
 from pathlib import Path
 
@@ -16,7 +17,6 @@ from rich.console import Console
 from rich.table import Table
 
 from corp_os_meta import (
-    ValidationResult,
     load_taxonomy,
     normalize_frontmatter,
     validate_frontmatter,
@@ -46,7 +46,9 @@ def main():
 
 @main.command()
 @click.argument("path", type=click.Path(exists=True))
-@click.option("--recursive", "-r", is_flag=True, help="Process all .md files in directory")
+@click.option(
+    "--recursive", "-r", is_flag=True, help="Process all .md files in directory"
+)
 @click.option("--strict", is_flag=True, help="Fail on any validation issue")
 def validate(path: str, recursive: bool, strict: bool):
     """Validate note frontmatter against schema."""
@@ -79,7 +81,9 @@ def validate(path: str, recursive: bool, strict: bool):
 
 @main.command()
 @click.argument("path", type=click.Path(exists=True))
-@click.option("--in-place", "-i", is_flag=True, help="Overwrite file with normalized version")
+@click.option(
+    "--in-place", "-i", is_flag=True, help="Overwrite file with normalized version"
+)
 def normalize(path: str, in_place: bool):
     """Normalize taxonomy terms in note frontmatter."""
     target = Path(path)
@@ -167,7 +171,7 @@ def report(vault_path: str):
             domain_table.add_row(domain, str(count))
         console.print(domain_table)
 
-    console.print(f"\n[bold]Vault stats:[/]")
+    console.print("\n[bold]Vault stats:[/]")
     console.print(f"  Notes: {len(note_files)}")
     console.print(f"  Quarantined: {quarantine_count}")
     console.print(f"  Unique topics: {len(all_topics)}")
