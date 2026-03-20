@@ -79,6 +79,14 @@ Coverage: models, normalize, validate, preprocess, products, utils, deep extract
 - **rich** (>=13.0) — terminal output formatting
 - **json-repair** (>=0.30) — fallback for malformed LLM JSON
 
+## API Keys
+
+Keys loaded globally from `Documents/.secrets/.env` via PowerShell profile.
+Do NOT add API keys to local `.env`.
+Check: `keys list` | Update: `keys set KEY value` | Reload: `keys reload`
+
+This repo uses: **none** — pure metadata schema/taxonomy library with no external API calls.
+
 ## Known issues
 
 - Code exceeds the <300 line target (999 lines across 8 modules)
