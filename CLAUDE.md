@@ -78,14 +78,16 @@ Coverage: models, normalize, validate, preprocess, products, utils, deep extract
 - **click** (>=8.0) — CLI framework
 - **rich** (>=13.0) — terminal output formatting
 - **json-repair** (>=0.30) — fallback for malformed LLM JSON
+- **python-dotenv** (>=1.0) — global .env loading for API keys
 
 ## API Keys
 
-Keys loaded globally from `Documents/.secrets/.env` via PowerShell profile.
+Keys loaded globally from `Documents/.secrets/.env` via PowerShell profile AND via `python-dotenv` in `cli.py` (works in all contexts: PS, Claude Code, VS Code).
 Do NOT add API keys to local `.env`.
 Check: `keys list` | Update: `keys set KEY value` | Reload: `keys reload`
 
 This repo uses: **none** — pure metadata schema/taxonomy library with no external API calls.
+Global .env is loaded in `cli.py` with `override=False` so env vars set by the shell take precedence.
 
 ## Known issues
 
