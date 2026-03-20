@@ -89,6 +89,23 @@ Check: `keys list` | Update: `keys set KEY value` | Reload: `keys reload`
 This repo uses: **none** — pure metadata schema/taxonomy library with no external API calls.
 Global .env is loaded in `cli.py` with `override=False` so env vars set by the shell take precedence.
 
+## Integration points
+
+This is the dependency root of the ecosystem. Other repos import it; it imports nothing from the ecosystem.
+
+- **corp-by-os**: imports `validate_frontmatter()`, `normalize_frontmatter()` for vault writes
+- **corp-knowledge-extractor**: imports Pydantic schemas, taxonomy, overlays for extraction output
+- **corp-project-extractor**: consumes validated frontmatter via CKE output (indirect)
+
+Changes to `NoteFrontmatter` or `taxonomy.yaml` affect ALL downstream repos.
+
+## Related repos
+
+- [ECOSYSTEM.md](../ECOSYSTEM.md) — full ecosystem overview
+- [corp-by-os](../corp-by-os/) — root orchestrator (primary consumer)
+- [corp-knowledge-extractor](../corp-knowledge-extractor/) — extraction engine (primary consumer)
+- [corp-project-extractor](../corp-project-extractor/) — project folder classifier
+
 ## Known issues
 
 - Code exceeds the <300 line target (999 lines across 8 modules)
