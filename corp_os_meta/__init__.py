@@ -12,22 +12,25 @@ from .models import (
     SourceType,
 )
 from .normalize import load_taxonomy, normalize_frontmatter, normalize_terms
+from .overlays import (
+    OVERLAY_MAP,
+    ArchitectureOverlay,
+    CommercialOverlay,
+    MeetingOverlay,
+    RFPOverlay,
+    SecurityOverlay,
+)
 from .products import (
     classify_source_tier,
+    expand_product_query,
+    get_children,
+    get_parent,
     get_product_display_name,
     get_source_reliability,
     is_platform_service,
     resolve_product_key,
 )
 from .utils import parse_llm_json
-from .overlays import (
-    ArchitectureOverlay,
-    CommercialOverlay,
-    MeetingOverlay,
-    OVERLAY_MAP,
-    RFPOverlay,
-    SecurityOverlay,
-)
 from .validate import (
     ValidationResult,
     generate_links_line,
@@ -58,6 +61,9 @@ __all__ = [
     "is_platform_service",
     "get_source_reliability",
     "classify_source_tier",
+    "get_parent",
+    "get_children",
+    "expand_product_query",
     "ArchitectureOverlay",
     "SecurityOverlay",
     "CommercialOverlay",

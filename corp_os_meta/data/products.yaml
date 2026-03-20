@@ -1,4 +1,62 @@
-schema_version: "1.0"
+schema_version: "1.1"
+
+# Top-level aliases: RFP Agent shorthand -> canonical key
+aliases:
+  planning: demand_planning
+  logistics: tms
+  catman: category_management
+  commerce: oms
+  scp: supply_planning
+
+# Sub-products with parent relationships for query expansion
+sub_products:
+  # WMS family
+  wms_native: {parent: wms}
+  wms_billing: {parent: wms}
+  wms_labor: {parent: wms}
+  wms_robotics: {parent: wms}
+  wms_tasking: {parent: wms}
+
+  # Planning family
+  planning_ibp: {parent: demand_planning}
+  planning_pps: {parent: demand_planning}
+
+  # TMS/Logistics family
+  logistics_carrier: {parent: tms}
+  logistics_load: {parent: tms}
+  logistics_modeling: {parent: tms}
+  logistics_ba: {parent: tms}
+  logistics_fom: {parent: tms}
+  logistics_procurement: {parent: tms}
+  logistics_to_tr: {parent: tms}
+
+  # Retail family (under demand_planning)
+  retail_demand_edge: {parent: demand_planning}
+  retail_ap: {parent: demand_planning}
+  retail_ar: {parent: demand_planning}
+  retail_clearance: {parent: demand_planning}
+  retail_ia: {parent: demand_planning}
+  retail_markdown: {parent: demand_planning}
+  retail_mfp: {parent: demand_planning}
+
+  # Category Management family
+  catman_assortment: {parent: category_management}
+  catman_space: {parent: category_management}
+
+  # Commerce/OMS family
+  commerce_orders: {parent: oms}
+
+  # SCP family
+  scp_promo_mgmt: {parent: supply_planning}
+  scp_promo_opt: {parent: supply_planning}
+  scp_sequencing: {parent: supply_planning}
+
+  # Other
+  flexis_other: {parent: wms}
+  flexis_slotting: {parent: wms}
+  workforce_alf: {parent: platform}
+  doddle: {parent: oms}
+
 products:
   - key: platform
     display_names: ["Blue Yonder Platform", "Platform"]

@@ -12,16 +12,41 @@ logger = logging.getLogger(__name__)
 _DATA_DIR = Path(__file__).parent / "data"
 _products_cache: list[dict] | None = None
 _tiers_cache: dict | None = None
+_aliases_cache: dict[str, str] | None = None
+_sub_products_cache: dict[str, dict] | None = None
 
 _FUZZY_THRESHOLD = 0.85
+
+
+def _load_products_yaml() -> dict:
+    """Load and return the full products YAML document."""
+    with open(_DATA_DIR / "products.yaml") as f:
+        return yaml.safe_load(f)
 
 
 def _load_products() -> list[dict]:
     global _products_cache
     if _products_cache is None:
-        with open(_DATA_DIR / "products.yaml") as f:
-            _products_cache = yaml.safe_load(f)["products"]
+        _products_cache = _load_products_yaml()["products"]
     return _products_cache
+
+
+def _load_aliases() -> dict[str, str]:
+    """Load top-level aliases: shorthand -> canonical key."""
+    global _aliases_cache
+    if _aliases_cache is None:
+        data = _load_products_yaml()
+        _aliases_cache = data.get("aliases", {})
+    return _aliases_cache
+
+
+def _load_sub_products() -> dict[str, dict]:
+    """Load sub-product hierarchy: sub_key -> {parent: parent_key}."""
+    global _sub_products_cache
+    if _sub_products_cache is None:
+        data = _load_products_yaml()
+        _sub_products_cache = data.get("sub_products", {})
+    return _sub_products_cache
 
 
 def _load_tiers() -> dict:
@@ -47,13 +72,26 @@ def _build_name_index() -> dict[str, str]:
 def resolve_product_key(display_name: str) -> str | None:
     """Resolve display name to canonical key.
 
-    Uses exact (case-insensitive) match first, then fuzzy match (>0.85 similarity).
-    Checks variants too.
+    Resolution order:
+    1. Alias lookup (e.g. "planning" -> "demand_planning")
+    2. Sub-product key lookup (e.g. "wms_billing" -> "wms_billing")
+    3. Exact display-name match (case-insensitive)
+    4. Fuzzy display-name match (>0.85 similarity)
     """
-    index = _build_name_index()
-    lowered = display_name.lower()
+    lowered = display_name.lower().strip()
 
-    # Exact match
+    # Alias resolution
+    aliases = _load_aliases()
+    if lowered in aliases:
+        return aliases[lowered]
+
+    # Sub-product key lookup (return the sub-product key itself, not parent)
+    sub_products = _load_sub_products()
+    if lowered in sub_products:
+        return lowered
+
+    # Exact display-name match
+    index = _build_name_index()
     if lowered in index:
         return index[lowered]
 
@@ -72,6 +110,33 @@ def resolve_product_key(display_name: str) -> str | None:
         return best_key
 
     return None
+
+
+def get_parent(key: str) -> str | None:
+    """Return parent product key for a sub-product, or None if top-level."""
+    sub_products = _load_sub_products()
+    entry = sub_products.get(key)
+    if entry:
+        return entry["parent"]
+    return None
+
+
+def get_children(key: str) -> list[str]:
+    """Return list of sub-product keys whose parent is `key`."""
+    sub_products = _load_sub_products()
+    return sorted(
+        sub_key for sub_key, info in sub_products.items() if info["parent"] == key
+    )
+
+
+def expand_product_query(key: str) -> list[str]:
+    """Expand a product key into [key] + all child sub-product keys.
+
+    Used for retrieval filtering: querying "wms" should also match
+    notes tagged with "wms_billing", "wms_native", etc.
+    """
+    children = get_children(key)
+    return [key] + children
 
 
 def get_product_display_name(key: str) -> str | None:
