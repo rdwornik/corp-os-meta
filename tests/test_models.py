@@ -139,3 +139,21 @@ def test_caps_not_exceeded():
         source_file="test.md",
     )
     assert len(note.topics) == 8
+
+
+@pytest.mark.parametrize("doc_type", [
+    DocumentType.SPREADSHEET,
+    DocumentType.VENDOR_ASSESSMENT,
+    DocumentType.DISCOVERY,
+])
+def test_new_document_types(doc_type):
+    """New document types added for CKE v0.6.0 are valid."""
+    note = NoteFrontmatter(
+        title=f"Test {doc_type.value}",
+        date=date(2026, 3, 24),
+        type=doc_type,
+        source_tool="knowledge-extractor",
+        source_file="test.xlsx",
+    )
+    assert note.type == doc_type
+    assert note.type.value == doc_type.value

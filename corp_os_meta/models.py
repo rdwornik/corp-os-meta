@@ -26,6 +26,9 @@ class DocumentType(str, Enum):
     REPORT = "report"
     TUTORIAL = "tutorial"
     SECURITY_QUESTIONNAIRE = "security_questionnaire"
+    SPREADSHEET = "spreadsheet"
+    VENDOR_ASSESSMENT = "vendor_assessment"
+    DISCOVERY = "discovery"
 
 
 class SourceType(str, Enum):
